@@ -8,7 +8,7 @@ function FishBowlScene:ctor()
             UILabelType = 2, text = "Canny Fish", size = 64})
         :align(display.CENTER, display.cx, display.cy)
         :addTo(self)--]]
-		self.mainBg_ = display.newSprite("bg/601015-hd.png",display.cx,display.cy)
+		self.mainBg_ = display.newSprite("bg/601016_hd.png",display.cx,display.cy)
 		self:addChild(self.mainBg_) 
 		
 end

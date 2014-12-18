@@ -77,7 +77,7 @@ end
 function CannyFishUnit:onRandInit()
 	local initRandomPoint = ccp(RandomFloat(m_safeRectBound:getMaxX(), m_safeRectBound:getMinX()), RandomFloat(m_safeRectBound:getMaxY(), m_safeRectBound:getMinY()))
 	self:setPosition(initRandomPoint);
-	m_bFlipX = math.random()% 1000 < 500;
+	m_bFlipX = math.random(1000) < 500;
 	self.pAnimateSpriteGroup_[self.nCurAnimateType_]:setFlipX(m_bFlipX)
 end
 
@@ -91,7 +91,7 @@ function CannyFishUnit:getFaceToSafeBoundYDist(bMoveUp)
 	return   math.abs( (bMoveUp and self.safeRextBound_:getMaxY() - self:getPostionY()) or (self:getPostionY() - self.safeRextBound_:getMinY()) )
 end
  
-
+ 
 --检测当前是否强制转身
 function CannyFishUnit:onCheckNeedForceTurn()
 	return  self:getFaceToSafeBoundXDist() <= self.textureSize_.width
@@ -108,18 +108,55 @@ function CannyFishUnit:onCheckSkewEnable()
 	end
 	return  self.bSwimUp_ or self.bSwimDown_ 
 end
+ 
 
-
-
---默认匀速自由游动逻辑
-function CannyFishUnit:onNoramlFreeSwimming()
-	
+--自动游动逻辑
+function CannyFishUnit:autoSwimmingLogic()
+	if self.bRunning_ then 
+	   --检测当前是否必须转身
+	   if self:onCheckNeedForceTurn() then 
+		  self:playAnimate(EventType.Turn_Animate_Type,false)
+	   else 
+		  local randTurnSwtich = math.random(1000) 
+		  if randTurnSwtich < 800 then 
+			 self:onNoramlFreeSwimming()
+		  elseif self.bLastTurn_ then 
+		    if not self:onVariableFreeSwimming() then 
+			   self:onNoramlFreeSwimming()
+			end 
+		  else 
+			 self:playAnimate(EventType.Turn_Animate_Type,false)
+		  end 
+	   end
+	end
 end
 
 
---运动结束回调通知事件
+
+--默认匀速自由游动逻辑 Default
+function CannyFishUnit:onNoramlFreeSwimming()
+	if math.random(1000) < 350 then 
+		self:onLineRouteUniformSwimming()
+	else
+		self:onSkewRouteUniformSwimming()
+	end
+end
+
+
+--变速自由游动逻辑
+function CannyFishUnit:onVariableFreeSwimming()
+	if math.random(1000) < 300 then 
+	   return self:onFastLineRoteSwimming()
+	else 
+	   return self:onFastSkewRoteSwimming()
+	end
+end
+
+
+
+--移动结束回调通知事件
 function CannyFishUnit:moveCompleteEventHandler()
-	
+	self:autoSwimmingLogic()
 end
 
 
@@ -209,6 +246,7 @@ function CannyFishUnit:onSkewDownUniformSwimming(downRotation)
 end
 
 
+ 
 --检测当前是否可以执行加速游动
 --param1 加速旋转角度
 --param2 上下方向加速
@@ -228,20 +266,59 @@ end
 --return 是否可以执行横向加速
 function CannyFishUnit:onFastLineRoteSwimming()
 	if self:checkCanRunFastSwimming(0,false) then
-	   
+	   self:innerFastSwimingLogic(0,false)
+ 	   return true
 	end
+	return false
+end
+
+--执行鱼鱼斜线加速游动逻辑
+--return 是否可以执行纵向加速
+function CannyFishUnit:onFastSkewRoteSwimming()
+    local  randRotation = utils.RandomFloat(50,5) 
+	local  randResult   = math.random(1000) < 500
+	if self:checkCanRunFastSwimming(randRotation,not randResult) then 
+		self:innerFastSwimingLogic(randRotation,not randResult)
+		return true
+	elseif  self:checkCanRunFastSwimming(randRotation,randResult)
+		self:innerFastSwimingLogic(randRotation,randResult)
+		return true
+	end 
+	return false
 end
 
 
 
-
-
-
-	
-	
-
-
-
+--内部实现的直线加速游动逻辑
+function CannyFishUnit:innerFastSwimingLogic(rotation,bMoveUp)
+	--首先随机距离
+	local xMaxDistance = self:getFaceToSafeBoundXDist()
+	local yMaxDistance = self:getFaceToSafeBoundYDist(bMoveUp) 
+	local maxDistance  = math.min(xMaxDistance,yMaxDistance)*math.cos(math.rad(rotation))
+	local randomInitSpeed = 0
+	local randomEndSpeed  = utils.RandomFloat(40,30)
+	local randomDistance  = 0
+	if CannyFishUnit.Min_Random_Fast_Distance < maxDistance then 
+		randomDistance = utils.RandomFloat(maxDistance,CannyFishUnit.Min_Random_Fast_Distance)
+	else  
+		randomDistance = maxDistance
+	end 
+	printInfo("innerFastLineRoteLogic real Distance : %f",randomDistance)
+	randomInitSpeed = utils.RandomFloat(3*randomDistance-randomEndSpeed, 2*randomDistance-randomEndSpeed)
+	randomInitSpeed = math.min(randomInitSpeed,utils.RandomFloat(200,80))
+	--计算减速下的时间
+	local reduceSpeedDuration  = 2 * 0.72 * randomDistance / (randomInitSpeed + randomEndSpeed)
+	local uniformSpeedDuration = 0.28 * randomDistance / randomEndSpeed
+	local pVariableSpeedAction = VariableSpeedMoveAction:createVariableSpeedMoveAction(self.bFlipX_,bMoveUp,rotation,randomInitSpeed,randomEndSpeed,
+		(reduceSpeedDuration+uniformSpeedDuration),uniformSpeedDuration,self.pAnimationEffect_,reduceSpeedDuration,3.5,0.8)
+	local function moveEndHandler()
+		self:moveCompleteEventHandler()
+	end
+	local moveEndCall = CallFunc:create(moveEndHandler)
+	local sequenceAction = Sequence:createWithTwoActions(pVariableSpeedAction,moveEndCall)
+	self:runAction(sequenceAction) 	 	
+end
+ 
 
 
 
