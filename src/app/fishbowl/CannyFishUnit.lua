@@ -60,8 +60,8 @@ function CannyFishUnit:initCannyFishUnit(fishUID,fishMetaID,fishState)
 	self.pAnimateSpriteGroup_[EventType.Normal_Animate_Type] = display.newSprite()
 	self.pAnimateSpriteGroup_[EventType.Eat_Animate_Type] 	 = display.newSprite()
 	self.pAnimateSpriteGroup_[EventType.Turn_Animate_Type] 	 = display.newSprite() 
-	self.bRunning_    = true 
-	self.bLastTurn_   = false 
+	self.bRunning_     = true 
+	self.bLastTurn_    = false 
 	self.pAnimateUnit_ = FishesAnimateManager:getAnimateUnitByMetaID(self.nFishMetaID_)
 	self:addChild(self.pAnimateSpriteGroup_[EventType.Normal_Animate_Type],CannyFishUnit.Node_ZOrder.Animate_Tmp,CannyFishUnit.Node_Tags.Animate_Normal)
 	self:addChild(self.pAnimateSpriteGroup_[EventType.Eat_Animate_Type],CannyFishUnit.Node_ZOrder.Animate_Tmp,CannyFishUnit.Node_Tags.Animate_Turn)

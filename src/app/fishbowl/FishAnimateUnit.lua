@@ -88,6 +88,7 @@ function FishAnimateUnit:loadFishAnimates(bLoadUtilsConfig)
 		   self.tUtilAnimateGroup_[typeIndex] = self:innerLoadUtilAnimateByType(typeIndex)
 		end
 	end
+	return 0 < table.nums(self.tFishAnimateGroup_)
 end
  
 
