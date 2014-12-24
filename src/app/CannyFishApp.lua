@@ -1,11 +1,17 @@
 require("app.config")
 require("cocos.init")
 require("framework.init")
+require("app.utils.init")
 
 local CannyFishApp = class("CannyFishApp", cc.mvc.AppBase)
 
 function CannyFishApp:ctor()
     CannyFishApp.super.ctor(self)
+    self:init()
+end
+
+function CannyFishApp:init()
+    GlobalMode:init()
 end
 
 function CannyFishApp:run()

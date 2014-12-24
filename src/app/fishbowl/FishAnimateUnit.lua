@@ -21,8 +21,9 @@ FishAnimateUnit.Util_PlistName_Template    =  {"%d_ulti_Ulti_Eat_%d.png",
 FishAnimateUnit.Fish_AnimateName_Template  =  {"%d_Fish_Big_Normal",
 											   "%d_Fish_Big_Eat",
 											   "%d_Fish_Big_Turn",
-											   "%d_Fish_Big_Ext"}								.								
-		
+											   "%d_Fish_Big_Ext"}
+  
+--鱼鱼皇冠KeyCache模板		
 FishAnimateUnit.Util_AnimateName_Template  =  {"%d_Ulti_Normal",
 											   "%d_Ulti_Eat",
 										       "%d_Ulti_Turn",
@@ -32,7 +33,7 @@ FishAnimateUnit.Util_AnimateName_Template  =  {"%d_Ulti_Normal",
 FishAnimateUnit.Fish_PlistPath="fishes/%d_normal_1920x1080"
 FishAnimateUnit.Util_PlistPath="fishes/%d_ulti_1920x1080"
 
-FishAnimateUnit.Default_Fish_MetaID        =  100001
+FishAnimateUnit.Default_Fish_MetaID        =  101238
 
 
 --目前的设计为直接读取动画到AnimateCache中，后续加入FishMetaData 来配置
@@ -94,10 +95,10 @@ end
 
 --检测当前鱼鱼的Meta配置文件是否正确
 function FishAnimateUnit:checkMetaValid()
-    local fishPlistPath = string.format(FishAnimateUnit.Fish_PlistPath,self.nFishMetaID_) 
-    self.bExsitFishAnimate_ = io.exists(fishPlistPath..".plist") 
+    local fishPlistPath = string.format(FishAnimateUnit.Fish_PlistPath,self.nFishMetaID_)
+    self.bExsitFishAnimate_ = utils:CheckFileExist(fishPlistPath..".plist")
     local UtilPlistPath = string.format(FishAnimateUnit.Util_PlistPath,self.nFishMetaID_)
-	self.bExsitUtilAnimate_ = io.exists(UtilPlistPath..".plist") 
+	self.bExsitUtilAnimate_ = utils:CheckFileExist(UtilPlistPath..".plist")
 	if not self.bExsitFishAnimate_ then 
 	   printf("FishMeta UnValid: %s",tostring(self.nFishMetaID_))
 	   self.bValid_ = false
@@ -111,26 +112,27 @@ end
  
 --加载指定的鱼鱼游动动画 fishAnimateType 见 EventType
 function FishAnimateUnit:innerLoadFishAnimatesByType(fishAnimateType)
-   assert(EventType.Normal_Animate_Type<fishAnimateType and fishAnimateType <= EventType.Ext_Animate_Type,"loadFishAnimate Type  Error")
+   printInfo("FishAnimateType: %s",tostring(fishAnimateType))
+   assert(EventType.UnKown_Animate_Type < fishAnimateType and fishAnimateType <= EventType.Ext_Animate_Type,"fishAnimateType Error!")
    local  fishAnimateName = string.format(FishAnimateUnit.Fish_AnimateName_Template[fishAnimateType],self.nFishMetaID_)
-   local  fishAnimate = AnimationCache:sharedAnimationCache():animationByName(fishAnimateName)
+   local  fishAnimate = cc.AnimationCache:getInstance():getAnimation(fishAnimateName)
    if not fishAnimate then 
 	  if self:checkHadLoadedFishPlistBefore() then 
 		 local filePath = string.format(FishAnimateUnit.Fish_PlistPath,self.nFishMetaID_)
-		 SpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile(filePath..".plist",filePath..".png")
+		 cc.SpriteFrameCache:getInstance():addSpriteFrames(filePath..".plist",filePath..".png")
 	  end
 	  local tmpSpriteFrame_ = nil 
 	  local frameIndex     = 0
 	  local frameTable_    = {}
-	  tmpSpriteFrame_ = SpriteFrameCache:sharedSpriteFrameCache:getSpriteFrameByName(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
+	  tmpSpriteFrame_ = cc.SpriteFrameCache:getInstance():getSpriteFrame(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
 	  while tmpSpriteFrame_ do 
 	    table.insert(frameTable_,tmpSpriteFrame_)
 		frameIndex=frameIndex+1
-	    tmpSpriteFrame_ = SpriteFrameCache:sharedSpriteFrameCache:getSpriteFrameByName(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
+	    tmpSpriteFrame_ = cc.SpriteFrameCache:getInstance():getSpriteFrame(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
 	  end
 	  fishAnimate = display.newAnimation(frameTable_,0.083)
 	  if fishAnimate then 
-		 AnimationCache:sharedAnimationCache():addAnimation(fishAnimate,fishAnimateName)
+		 cc.AnimationCache:getInstance():addAnimation(fishAnimate,fishAnimateName)
 	  end 
    end 
    return fishAnimate
@@ -141,24 +143,24 @@ function FishAnimateUnit:innerLoadUtilAnimateByType(fishAnimateType)
    assert(EventType.Normal_Animate_Type<fishAnimateType and fishAnimateType <= EventType.Ext_Animate_Type,"loadFishAnimate Type  Error")
    if self.bExsitUtilAnimate_ then 
 	   local  fishAnimateName = string.format(FishAnimateUnit.Util_AnimateName_Template[fishAnimateType],self.nFishMetaID_)
-	   local  fishAnimate = AnimationCache:sharedAnimationCache():animationByName(fishAnimateName)
+	   local  fishAnimate = cc.AnimationCache:getInstance():getAnimation(fishAnimateName)
 	   if not fishAnimate then 
 		  if self:checkHadLoadedUtilPlistBefore() then 
 			 local filePath = string.format(FishAnimateUnit.Util_PlistPath,self.nFishMetaID_)
-			 SpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile(filePath..".plist",filePath..".png")
+			 cc.SpriteFrameCache:getInstance():addSpriteFrames(filePath..".plist",filePath..".png")
 		  end
 		  local tmpSpriteFrame_ = nil 
 		  local frameIndex     = 0
 		  local frameTable_    = {}
-		  tmpSpriteFrame_ = SpriteFrameCache:sharedSpriteFrameCache:getSpriteFrameByName(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
+		  tmpSpriteFrame_ = cc.SpriteFrameCache:getInstance():getSpriteFrame(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
 		  while tmpSpriteFrame_ do 
 			table.insert(frameTable_,tmpSpriteFrame_)
 			frameIndex=frameIndex+1
-			tmpSpriteFrame_ = SpriteFrameCache:sharedSpriteFrameCache:getSpriteFrameByName(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
+			tmpSpriteFrame_ = cc.SpriteFrameCache:getInstance():getSpriteFrame(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
 		  end
 		  fishAnimate = display.newAnimation(frameTable_,0.083)
 		  if fishAnimate then 
-			 AnimationCache:sharedAnimationCache():addAnimation(fishAnimate,fishAnimateName)
+			 cc.AnimationCache:getInstance():addAnimation(fishAnimate,fishAnimateName)
 		  end 
 	   end 
 	   return fishAnimate 
@@ -169,12 +171,12 @@ end
 
 --检测当前是否已经加载动画类型
 function FishAnimateUnit:checkHadLoadedFishPlistBefore()
-	return 0 < table.num(self.tFishAnimateGroup_)
+	return 0 < table.nums(self.tFishAnimateGroup_)
 end
 
 --检测当前是否已经加载皇冠类型
 function FishAnimateUnit:checkHadLoadedUtilPlistBefore()
-	return 0 < table.num(self.tUtilAnimateGroup_)
+	return 0 < table.nums(self.tUtilAnimateGroup_)
 end
 
 --根据动画类型获取对应的鱼鱼游动动画
@@ -200,7 +202,7 @@ end
  
 --判断是否加载过皇冠动画
 function FishAnimateUnit:bHadLoadedUtilAnimate()
-	return  table.num(self.tUtilAnimateGroup_)
+	return  table.nums(self.tUtilAnimateGroup_)
 end
   
 

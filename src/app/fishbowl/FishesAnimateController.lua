@@ -6,7 +6,7 @@ local FishAnimateUnit = import(".FishAnimateUnit")
 
 function  FishesAnimateController:ctor()
     self.fishesMetaInfoData_    = {}
-	self.fishesAnimateData_ = {}
+	self.fishesAnimateData_ 	= {}
 	
 end
 
