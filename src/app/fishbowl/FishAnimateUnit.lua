@@ -112,27 +112,29 @@ end
  
 --加载指定的鱼鱼游动动画 fishAnimateType 见 EventType
 function FishAnimateUnit:innerLoadFishAnimatesByType(fishAnimateType)
-   printInfo("FishAnimateType: %s",tostring(fishAnimateType))
+   -- printInfo("loading AnimateType: [%s]",tostring(fishAnimateType))
    assert(EventType.UnKown_Animate_Type < fishAnimateType and fishAnimateType <= EventType.Ext_Animate_Type,"fishAnimateType Error!")
    local  fishAnimateName = string.format(FishAnimateUnit.Fish_AnimateName_Template[fishAnimateType],self.nFishMetaID_)
    local  fishAnimate = cc.AnimationCache:getInstance():getAnimation(fishAnimateName)
+   local  frameTable_ = {}
    if not fishAnimate then 
-	  if self:checkHadLoadedFishPlistBefore() then 
+	  if not self:checkHadLoadedFishPlistBefore() then 
 		 local filePath = string.format(FishAnimateUnit.Fish_PlistPath,self.nFishMetaID_)
+		 -- printInfo("loading plistFilePath: [%s] ",filePath)             
 		 cc.SpriteFrameCache:getInstance():addSpriteFrames(filePath..".plist",filePath..".png")
 	  end
 	  local tmpSpriteFrame_ = nil 
-	  local frameIndex     = 0
-	  local frameTable_    = {}
+	  local frameIndex     = 0 
 	  tmpSpriteFrame_ = cc.SpriteFrameCache:getInstance():getSpriteFrame(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
 	  while tmpSpriteFrame_ do 
-	    table.insert(frameTable_,tmpSpriteFrame_)
+ 	    frameTable_[#frameTable_ + 1]=tmpSpriteFrame_ 
 		frameIndex=frameIndex+1
 	    tmpSpriteFrame_ = cc.SpriteFrameCache:getInstance():getSpriteFrame(string.format(FishAnimateUnit.Fish_PlistName_Template[fishAnimateType],self.nFishMetaID_,frameIndex))
 	  end
-	  fishAnimate = display.newAnimation(frameTable_,0.083)
+	  fishAnimate = display.newAnimation(frameTable_,0.08)
 	  if fishAnimate then 
 		 cc.AnimationCache:getInstance():addAnimation(fishAnimate,fishAnimateName)
+		 -- printInfo("FishAnimate Meta : [%s] FishType :[%s] Success!",tostring(self.nFishMetaID_),tostring(fishAnimateName)) 
 	  end 
    end 
    return fishAnimate
@@ -205,5 +207,21 @@ function FishAnimateUnit:bHadLoadedUtilAnimate()
 	return  table.nums(self.tUtilAnimateGroup_)
 end
   
+
+--销毁加载的动画Cache
+function FishAnimateUnit:releaseAllAnimates()
+   local animateName = ""
+   --移除鱼鱼动画
+   for _,fishAnimateItem in pairs(FishAnimateUnit.Fish_AnimateName_Template) do 
+     animateName = string.format(fishAnimateItem,self.nFishMetaID_)
+     cc.AnimationCache:getInstance():removeAnimation(animateName)
+   end
+   for _,fishAnimateItem in pairs(FishAnimateUnit.Util_AnimateName_Template) do 
+     animateName = string.format(fishAnimateItem,self.nFishMetaID_)
+     cc.AnimationCache:getInstance():removeAnimation(animateName)
+   end 
+   	self.tFishAnimateGroup_ 	= {}				    --鱼鱼的游动动画组
+	self.tUtilAnimateGroup_ 	= {}					--鱼鱼的皇冠动画组 
+end
 
 return FishAnimateUnit 

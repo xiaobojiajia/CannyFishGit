@@ -9,12 +9,12 @@ end
 
 --装载模型队列
 function GlobalMode:pushModeByData(modeName,modeData)
-	assert(modeName and modeData,"pushMode Error For [%s]",modeName)
-	if not self.modeList_[modeName] then 
-       printInfo("pushModeByData [%s] had Exist Before!",modeName)
+	assert(modeName and modeData,"Generate ModeData failed : 【%s】",modeName)
+	if self.modeList_[modeName] then 
+       printInfo("Wainning! Generate 【%s】Exist Before ",modeName)
 	end 
 	self.modeList_[modeName] = modeData
-    printInfo("pushModeByData [%s] success!",modeName)
+    printInfo("Generate ModeData 【%s】success!",modeName)
    	return modeData
 end
 
@@ -32,7 +32,7 @@ function GlobalMode:pushModeByFullName(modeName,modeFile,attachParam)
 		if modeHandler then 
 	       return self:pushModeByData(modeName,modeHandler.new(attachParam))
 	    else
-	       printInfo("Cannot Found ModePath: %s",modeFile)
+	       printInfo("Error : Cannot Found ModePath 【%s】",modeFile)
 	       return nil
 		end
 	else

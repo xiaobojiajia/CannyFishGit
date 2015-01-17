@@ -13,14 +13,12 @@ end
 function EventManager:addEvent(eventName,target,handler) 
 	if type(eventName) =="table" then
 	  for _,subEventName in pairs(eventName) do
-	  	printf("EventManager >> addEvent : 【%s】",subEventName)
+	  	printf("---addEvent : 【%s】",tostring(subEventName))
 	    self:addEvent_(subEventName,target,handler)
-	  end
-	elseif type(eventName) =="string" then
-		printf("EventManager >> addEvent : 【%s】 ",eventName)
-	    self:addEvent_(eventName,target,handler)
-	else
-		printf("EventManager >> addEvent Error : 【%s】",tostring(eventName))
+	  end 
+	else 
+		printf("---addEvent : 【%s】 ",tostring(eventName))
+	    self:addEvent_(eventName,target,handler) 
 	end 
 end
 
@@ -42,7 +40,7 @@ end
 
 
 function EventManager:pushEvent(eventName,...) 
-    printf("EventManager >> pushEvent : 【%s】 ",eventName) 
+    printf("----pushEvent : 【%s】 ",eventName) 
     local  eventsList = self.eventListenList_[eventName]
     if eventsList then
     	for index,hanlderItem in pairs(eventsList) do

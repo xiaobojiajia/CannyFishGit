@@ -1,8 +1,11 @@
-﻿-- 鱼鱼动画集合管理器
+-- 鱼鱼动画集合管理器
 -- 负责加载和管理 所有的鱼鱼的动画结构
 
 local FishesAnimateController = class("FishesAnimateController")
 local FishAnimateUnit = import(".FishAnimateUnit")
+
+FishesAnimateController.CannyFoodPath = "foods/FishFood_1920x1080"
+
 
 function  FishesAnimateController:ctor()
     self.fishesMetaInfoData_    = {}
@@ -36,6 +39,11 @@ function  FishesAnimateController:preLoadAnimatesCacheFromMetas(fishMetas)
 		 end 
 	end 		
 end
+
+function FishesAnimateController:preLoadCannyFoodsFrames()
+    cc.SpriteFrameCache:getInstance():addSpriteFrames(FishesAnimateController.CannyFoodPath..".plist",FishesAnimateController.CannyFoodPath..".png") 
+end
+
 
 function  FishesAnimateController:generateAnimateUnitByMetaID(metaID)
 	 local iFishAnimateUnit = FishAnimateUnit.new(metaID)

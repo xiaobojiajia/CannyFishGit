@@ -6,7 +6,7 @@ utils = {}
 function utils.RandomFloat(maxValue,minValue)
 	local differValue  = math.abs(maxValue-minValue)
 	local realMinValue = math.min(maxValue,minValue)
-	if differValue <= 1.0 then
+	if differValue <= 0.5 then
 	   return maxValue
 	end
 	return math.random(1000) % math.floor(differValue) + realMinValue

@@ -12,11 +12,14 @@ end
 
 function CannyFishApp:init()
     GlobalMode:init()
+    EventManager:init()
 end
 
 function CannyFishApp:run()
 	--设定客户端的资源搜索路径
     cc.FileUtils:getInstance():addSearchPath("res/")
+    cc.FileUtils:getInstance():addSearchPath("res/fishes/")
+    cc.FileUtils:getInstance():addSearchPath("res/foods/") 
 	--初始化随机种子(高精度)
 	math.randomseed(tostring(os.time()):reverse():sub(1,6)) 
     self:enterScene("FishBowlScene")

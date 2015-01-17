@@ -1,7 +1,8 @@
 {
     "init_cfg":{
        "isLandscape": true,
-       "isWindowTop": true,
+       "isWindowTop": false,
+	   "debugToFile": false,
        "name": "cannyfish",
        "width": 960,
        "height": 640,
