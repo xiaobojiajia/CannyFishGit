@@ -261,7 +261,7 @@ function CannyFishUnit:onLineRouteUniformSwimming()
 	local bAutoEase   = false  
 	if  randomValue < 1000 then 
 	   self.pAnimationEffect_:setSpeedScale(1.15)
-	   pMoveToAction = cc.EaseSineOut:create(pMoveToAction)  
+	   pMoveToAction = cc.EaseSineIn:create(pMoveToAction)  
 	   printf("onLineRouteUniformSwimming Using : EaseSineOut")
 	elseif randomValue < 200 then  
 	   self.pAnimationEffect_:setSpeedScale(1.3)  

@@ -37,6 +37,12 @@ EventType.FeedState	  	 	  =   3   --喂食游动状态
 EventType.MonsterScareState	  =   4   --怪物惊吓游动状态
 
 
+
+--全局触摸事件类型
+EventType.TouchBegin          =   0
+EventType.TouchMoved  		  =   1
+EventType.TouchEnded 		  =   2
+EventType.TouchCancel         =   3
  
 
 --GlobalMode 名称

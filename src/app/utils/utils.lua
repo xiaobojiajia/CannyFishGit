@@ -25,11 +25,18 @@ function utils:CheckFileExist(fileName)
    return io.exists(utils.GetFullPathByFileName(fileName))  
 end
 
+--startRand With Random Key recommond Using 1000 
+function utils.startRandFunc(randomkey)
+   utils.randomValue = math.max(0,math.random(randomkey)) / 10 
+end 
 
+--check rand in range from start to end Rate eg[23.5,54,5]
+function utils.CheckRandInRange(startRate,endRate)
+  return  startRate <= utils.randomValue and endRate <= utils.randomValue   
+end
 
-
-
-
+ 
+ -- moveAction = cc.EaseExponentialOut:create(moveAction)  
 return utils
 
 

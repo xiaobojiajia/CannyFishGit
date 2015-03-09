@@ -21,10 +21,10 @@ function FoodGroupController:initFoodGroupController()
    	    self.foodsBatchLayer_	 = cc.SpriteBatchNode:createWithTexture(spriteFrame:getTexture())
 		self:addChild(self.foodsBatchLayer_)
 		self.bFeedState_   		 = EventType.UnKownFeedState
-		self.activeFoodID_ 		 = nil 
+		self.activeFoodID_ 		 = 302001       --Cur Active Food ID (*302001)
 		self.circleFoodsList_    = {}
-		self.startGIDIndex_ 	 = math.random(100)
-		self.curFoodIndex_       = self.startGIDIndex_
+		self.startGIDIndex_ 	 = math.random(100)      --起始索引
+		self.curFoodIndex_       = self.startGIDIndex_   --当前索引
 		return true
 	end
 	return false
@@ -32,15 +32,36 @@ end
 
 
 function FoodGroupController:startFeedTouch(posX,posY)
+	self.prePosition_ = cc.p(posX,posY)
+	self:cannyFeeding(posX,posY) 
+	self.bMovedFeed_  = false
 end
 
-function FoodGroupController:movedFeedTouch(posX,posY)
+function FoodGroupController:movedFeedTouch(posX,posY) 
+	if 20 <= math.abs(self.prePosition_.x - posX) or 20 <= math.abs(self.prePosition_.y - posY) then
+       self:cannyFeeding(posX,posY) 
+       self.prePosition_ = cc.p(posX,posY) 
+       self.bMovedFeed_  = true 
+    else
+       self.bMovedFeed_  = false 
+	end
+
 end
 
 function FoodGroupController:endedFeedTouch(posX,posY)
+	if self.bMovedFeed_ then 
+	   self:cannyFeeding(posX,posY) 
+	end
+	self.bMovedFeed_  = false
+	self.prePosition_ = cc.p(0,0) 
 end
 
-function FoodGroupController:canncelFeedTouch()
+function FoodGroupController:canncelFeedTouch(posX,posY)
+	if not self.bMovedFeed_ then 
+	   self:cannyFeeding(posX,posY) 
+	end
+	self.bMovedFeed_  = false
+	self.prePosition_ = cc.p(0,0) 
 end
 
 function FoodGroupController:setFeedState(feedState)
@@ -61,6 +82,7 @@ function FoodGroupController:checkSafeFood()
    return self.activeFoodID_ ~= nil	
 end 
 
+
 function FoodGroupController:getFoodGID() 
    self.curFoodIndex_ = self.curFoodIndex_ + 1
    return self.curFoodIndex_
@@ -68,20 +90,22 @@ end
 
 --对外接口 完成食物投递 操作
 --param1 喂食坐标
-function FoodGroupController:cannyFeeding(feedPos)  
+function FoodGroupController:cannyFeeding(posX,posY)  
     if self:checkSafeFood() then
    	   --首先分析循环队列中是否存在相同的ID	 
 	    local cannyFoodItem = nil
-	    local cricleTables = self.circleFoodsList_[self.activeFoodID_]
+	    local cricleTables  = self.circleFoodsList_[self.activeFoodID_]
 	    if cricleTables and next(cricleTables) then
 	       cannyFoodItem = cricleTables[1]
 	       table.remove(cricleTables,1)
 	    else
+	       --当前缓冲不够之时,重新创建分配
 	       cannyFoodItem = CannyFoodUnit.new(self.activeFoodID_)
 	       self.foodsBatchLayer_:addChild(cannyFoodItem)
 	    end   
+	    --重新设定鱼食索引ID
 	    cannyFoodItem:setFoodGID(self:getFoodGID())
-	    cannyFoodItem:feedFoodHandler(feedPos)
+	    cannyFoodItem:feedFoodHandler(posX,posY)
 	end
 end 
 
@@ -95,14 +119,16 @@ end
 
 function FoodGroupController:commonEventHandler(eventType,attachParam) 
    if EventType.FeedFootEvent == eventType then 
-   	  --可以接收外部通知消息来喂食
-   	  self:cannyFeeding(attachParam)
+   	  --可以接收外部通知消息来喂食 
+   	  -- self:cannyFeeding(attachParam.x,attachParam.y)  
    elseif EventType.FeedFootLostEvent == eventType then 
    	  --食物丢失
+   	  printInfo("Lost Event ----------")
    	  self:circleCannyFood(attachParam)
    elseif EventType.FeedFootEatEvent  == eventType then 
    	  --食物被吃掉了
-   	  self:circleCannyFood(attachParam)
+   	  printInfo("Eat Event  ----------")
+   	  -- self:circleCannyFood(attachParam)
    end 
 end
 
@@ -117,7 +143,7 @@ function FoodGroupController:onEnter()
 end
 
 function FoodGroupController:onExit()
-   EventManager:removeEventByTarget(self)
+    EventManager:removeEventByTarget(self)
 end
  
 return FoodGroupController
